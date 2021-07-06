@@ -1,3 +1,9 @@
+"""
+This file contains general functions regarding
+sparsity (standard basis, fourier basis, Haar wavelets).
+"""
+
+
 import numpy as np;
 import numpy.linalg as linalg;
 import numpy.fft as fft;
@@ -6,19 +12,26 @@ import pywt;
 
 import general_utils as utils;
 
+# Hard thresholding
 def HT(x, sparsity):
+    """
+    Hard thresholding
+    """
     abv = np.absolute(x);
     part = np.argpartition(abv, len(x)-sparsity);
     z = np.copy(x);
     z[part[:len(x)-sparsity]] = 0;
     return z;
 
-
 def HT_transform(x, sparsity, trans, inv_trans):
+    """
+    Hard thresholding in any basis.
+    The basis is defined through its transformation to and from the standard basis.
+    """
     return inv_trans(HT(trans(x), sparsity));
 
 
-
+# Fourier
 def fourier2d(x):
     """
     Applies 2D fast fourier transform to image. 
@@ -31,12 +44,11 @@ def inverse_fourier2d(x):
     """
     return fft.ifft2(x.reshape((28,28))).flatten();
 
-
+# Haar wavelets
 def waveletunpack(coef):
-    """
+    """ (MNIST)
     Unpacks tuple of approximation, horizontal detail, vertical detail and
     diagonal detail coefficients into single vector.
-    
     """
     
     cA = coef[0].flatten();
@@ -46,7 +58,7 @@ def waveletunpack(coef):
     return np.concatenate((cA, cH, cV, cD));
 
 def waveletpack(coef):
-    """
+    """ (MNIST)
     Splits a single vector of wavelet coefficients into separate approximation,
     horizontal detail, vertical detail and diagonal detail coefficients components.
     """
@@ -56,7 +68,6 @@ def waveletpack(coef):
     cV = splits[2].reshape((14,14));
     cD = splits[3].reshape((14,14));
     return (cA, (cH, cV, cD));
-    
     
 def haar2d(x):
     """
@@ -70,8 +81,11 @@ def inverse_haar2d(x):
     """
     return pywt.idwt2(waveletpack(x), 'haar').flatten();
 
-
 def waveletunpack_cifar(coef):
+    """ (CIFAR-10)
+    Unpacks tuple of approximation, horizontal detail, vertical detail and
+    diagonal detail coefficients into single vector.
+    """
     cA = coef[0].flatten();
     cH = coef[1][0].flatten();
     cV = coef[1][1].flatten();
@@ -79,6 +93,10 @@ def waveletunpack_cifar(coef):
     return np.concatenate((cA, cH, cV, cD));
 
 def waveletpack_cifar(coef):
+    """ (CIFAR-10)
+    Splits a single vector of wavelet coefficients into separate approximation,
+    horizontal detail, vertical detail and diagonal detail coefficients components.
+    """
     splits = np.split(coef, 4);
     cA = splits[0].reshape((16,16));
     cH = splits[1].reshape((16,16));
@@ -87,6 +105,9 @@ def waveletpack_cifar(coef):
     return (cA, (cH, cV, cD));
     
 def haar2d_3channel(x):
+    """
+    Applies single level 2D Haar wavelet transform to each color channel.
+    """
     (c1, c2, c3) = np.split(x, 3);
     u_channel1 = waveletunpack_cifar(pywt.dwt2(c1.reshape((32,32)), 'haar'));
     u_channel2 = waveletunpack_cifar(pywt.dwt2(c2.reshape((32,32)), 'haar'));
@@ -94,6 +115,9 @@ def haar2d_3channel(x):
     return np.concatenate((u_channel1, u_channel2, u_channel3));
     
 def inverse_haar2d_3channel(x):
+    """
+    Applies inverse single level 2D Haar wavelet transform to each color channel.
+    """
     (c1, c2, c3) = np.split(x, 3);
     channel1 = pywt.idwt2(waveletpack_cifar(c1), 'haar').flatten();
     channel2 = pywt.idwt2(waveletpack_cifar(c2), 'haar').flatten();
@@ -101,7 +125,7 @@ def inverse_haar2d_3channel(x):
     return np.concatenate((channel1, channel2, channel3));
 
 
-
+# Best errors for sparsity
 def best_normalized_error(x, sparsity):
     """
     Computes normalized distance of a signal to the set of sparse vectors in the standard basis.

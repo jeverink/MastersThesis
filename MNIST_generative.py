@@ -1,3 +1,8 @@
+"""
+This file contains general functions regarding
+the generative models for the MNIST data set.
+"""
+
 import torch;
 import torch.nn as nn;
 import torch.nn.functional as F;
@@ -9,6 +14,9 @@ import torchvision;
 import MNIST_utils as MNIST;
 
 class Encoder(nn.Module):
+    """
+    Fully connected encoder, halving the dimension with each layer, except for a specified final dimension.
+    """
     def __init__(self, layercount, bottleneck):
         super(Encoder, self).__init__();
         self.layers = [nn.Linear(in_features = int(28*28/(i+1)), out_features = int(28*28/(i+2))) for i in range(layercount-1)];
@@ -23,6 +31,9 @@ class Encoder(nn.Module):
         return x;
     
 class Decoder(nn.Module):
+    """
+    Fully connected decoder, doubling the dimension with each layer after a specific first dimension.
+    """
     def __init__(self, layercount, bottleneck):
         super(Decoder, self).__init__();
         self.layers = [nn.Linear(in_features = int(28*28/(i+2)), out_features = int(28*28/(i+1))) for i in range(layercount-1)];
@@ -38,6 +49,9 @@ class Decoder(nn.Module):
         return x;
     
 class AutoEncoder(nn.Module):
+    """
+    Combines encoder and decoder.
+    """
     def __init__(self, encoder, decoder):
         super(AutoEncoder, self).__init__();
         self.encoder = encoder;
@@ -47,13 +61,13 @@ class AutoEncoder(nn.Module):
     def forward(self, x):
         x = self.encoder(x);
         x = self.decoder(x);
-        return x;
-    
-    
-    
-    
+        return x;  
 
 def createNetwork(layercount, bottleneck):
+    """
+    Creates autoencoder with specified number of layers an bottleneck dimension.
+    The dimension is otherwise halved/doubled each layer.
+    """
     encoder = Encoder(layercount, bottleneck);
     decoder = Decoder(layercount, bottleneck);
     autoEncoder = AutoEncoder(encoder, decoder);
@@ -61,6 +75,9 @@ def createNetwork(layercount, bottleneck):
 
 
 def trainNetwork(network, data_loader, num_epochs = 20, learning_rate = 0.001):
+    """
+    Trains a given network on given data using Mean Squared Error loss funciton and Adam optimizer.
+    """
     criterion = nn.MSELoss();
     optimizer = torch.optim.Adam(network.parameters(), learning_rate);
     for epoch in range(1, num_epochs + 1):
@@ -78,6 +95,9 @@ def trainNetwork(network, data_loader, num_epochs = 20, learning_rate = 0.001):
         
 
 def project(im, network, num_epochs = 200, learning_rate = 0.1):
+    """
+    Projects given image on the range of a given network.
+    """
     im = torch.from_numpy(MNIST.VectorToImage(im)).float();
     inp = im.clone();
     inp.requires_grad_(True);
@@ -94,7 +114,13 @@ def project(im, network, num_epochs = 200, learning_rate = 0.1):
     return MNIST.ImageToVector(network(inp.unsqueeze(0).unsqueeze(0)).detach().numpy());
 
 def save_network(network, filename):
+    """
+    Saves state of network to file.
+    """
     torch.save(network.state_dict(), filename);
     
 def load_network(network, filename):
+    """
+    Loads state of network from file.
+    """
     return network.load_state_dict(torch.load(filename));

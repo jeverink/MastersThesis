@@ -1,3 +1,9 @@
+"""
+This file contains general functions regarding
+the generative models for the CIFAR-10 data set.
+"""
+
+
 import torch;
 import torch.nn as nn;
 import torch.nn.functional as F;
@@ -11,6 +17,10 @@ import CIFAR10_utils as CIFAR;
 from torch.autograd import Variable;
 
 class Autoencoder(nn.Module):
+    """
+    Simple autoencoder for CIFAR-10.
+    Consisting of 3 layers with a bottleneck of 768.
+    """
     def __init__(self):
         super(Autoencoder, self).__init__()
         self.encoder = nn.Sequential(
@@ -35,17 +45,26 @@ class Autoencoder(nn.Module):
     
 
 def createNetwork():
+    """
+    Creates a simple autoencoder for the CIFAR-10 data set.
+    """
     autoencoder = Autoencoder()
     if torch.cuda.is_available():
         autoencoder = autoencoder.cuda();
     return autoencoder;
 
 def get_torch_vars(x):
+    """
+    Returns variables as a Torch variable.
+    """
     if torch.cuda.is_available():
         x = x.cuda()
     return Variable(x)
 
 def trainNetwork(network, data_loader, num_epochs = 20, learning_rate = 0.001):
+    """
+    Trains a neural network on given data using Binary Cross Entropy loss and the Adam optimizer.
+    """
     with torch.cuda.device(0):
         criterion = nn.BCELoss();
         optimizer = optim.Adam(network.parameters());
@@ -69,6 +88,9 @@ def trainNetwork(network, data_loader, num_epochs = 20, learning_rate = 0.001):
         
 
 def project(im, network, num_epochs = 200, learning_rate = 0.1):
+    """
+    Projects given image on the range of a given network.
+    """
     im = torch.from_numpy(CIFAR.VectorToImage(im)).float();
     im = im.cuda();
     inp = im.clone();
@@ -87,7 +109,13 @@ def project(im, network, num_epochs = 200, learning_rate = 0.1):
     return CIFAR.ImageToVector(network(inp.unsqueeze(0))[1].detach().cpu().numpy());
 
 def save_network(network, filename):
+     """
+    Saves state of network to file.
+    """
     torch.save(network.state_dict(), filename);
     
 def load_network(network, filename):
+    """
+    Loads state of network from file.
+    """
     return network.load_state_dict(torch.load(filename));

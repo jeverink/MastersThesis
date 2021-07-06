@@ -1,3 +1,7 @@
+"""
+This file contains general functions regarding
+the CIFAR-10 data set and the reconstruction of elements from the CIFAR-10 dataset.
+"""
 import torch;
 from torch.utils.data import DataLoader;
 import torchvision;
@@ -11,6 +15,9 @@ import general_utils as utils;
 
 
 def load_dataset(transform = None):
+    """
+    Load CIFAR-10 train and test set.
+    """
     if transform == None:
         transform = torchvision.transforms.ToTensor();
     train_data = torchvision.datasets.CIFAR10(root='data', train=True, download=True, transform=transform);
@@ -24,20 +31,32 @@ def load_dataset(transform = None):
     return (train_data, test_data), (train_loader, test_loader);
 
 def getImage(data_loader, num):
+     ="""
+    Get specific image from a data loader.
+    """
     dataiter = iter(data_loader);
     images, labels = dataiter.next();
     im = images[num];
     return im;
 
 def getImageAsVector(data_loader, num):
+    """
+    Get specific image, flattened to vector, from a data loader.
+    """
     return getImage(data_loader, num).numpy().flatten();
 
 
 
 def ImageToVector(image):
+     """
+    Converts 3 channel, 2D image to one-dimensional vectors.
+    """
     return image.flatten();
 
 def VectorToImage(vector):
+    """
+    Converts one-dimensional vector to 3 channel, 2D image.
+    """
     return vector.reshape((3,32,32));
 
 

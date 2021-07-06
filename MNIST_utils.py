@@ -1,3 +1,8 @@
+"""
+This file contains general functions regarding
+the MNIST data set and the reconstruction of elements from the MNIST dataset.
+"""
+
 import torch;
 from torch.utils.data import DataLoader;
 import torchvision;
@@ -9,6 +14,9 @@ import numpy.linalg as linalg;
 import general_utils as utils;
 
 def load_dataset(transform = None):
+    """
+    Load MNIST train and test set.
+    """
     if transform == None:
         transform = torchvision.transforms.ToTensor();
     train_data = torchvision.datasets.MNIST(root='data', train=True, download = True, transform = transform);
@@ -23,6 +31,9 @@ def load_dataset(transform = None):
     
     
 def getTrainLoader(label, transform = None):
+    """
+    Load MNIST train set for a specific label.
+    """
     if transform == None:
         transform = torchvision.transforms.ToTensor();
     train_data = torchvision.datasets.MNIST(root='data', train=True, download = True, transform = transform);
@@ -35,15 +46,19 @@ def getTrainLoader(label, transform = None):
     return train_loader;
 
 def getImage(loader, num):
+    """
+    Get specific image from a data loader.
+    """
     dataiter = iter(loader);
     images, labels = dataiter.next();
     im = images[num][0];
     return im.numpy();
 
 def getImageAsVector(loader, num):
+    """
+    Get specific image, flattened to vector, from a data loader.
+    """
     return getImage(loader, num).flatten();
-
-
 
 def ImageToVector(image):
     """
@@ -56,9 +71,6 @@ def VectorToImage(vector):
     Converts one-dimensional vector to 2D image.
     """
     return vector.reshape((28,28));
-
-
-
 
 def reconstruct_BIP(A, q, x_true, projection, learning_param = 0.0005, iterations = 500, intermediate_accuracy = False):
     """
@@ -82,7 +94,6 @@ def reconstruct_BIP(A, q, x_true, projection, learning_param = 0.0005, iteration
         acc = linalg.norm(utils.normalize(x)-utils.normalize(x_true));
         
     return x, acc;
-
 
 def reconstruct_regularized(A, q, x_true, projection, inv_regularization_param, learning_param = 0.1, iterations = 250, intermediate_accuracy = False):
     """
