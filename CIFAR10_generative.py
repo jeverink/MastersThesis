@@ -109,7 +109,7 @@ def project(im, network, num_epochs = 200, learning_rate = 0.1):
     return CIFAR.ImageToVector(network(inp.unsqueeze(0))[1].detach().cpu().numpy());
 
 def save_network(network, filename):
-     """
+    """
     Saves state of network to file.
     """
     torch.save(network.state_dict(), filename);

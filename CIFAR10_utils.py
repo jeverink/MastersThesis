@@ -31,7 +31,7 @@ def load_dataset(transform = None):
     return (train_data, test_data), (train_loader, test_loader);
 
 def getImage(data_loader, num):
-     ="""
+    """
     Get specific image from a data loader.
     """
     dataiter = iter(data_loader);
@@ -48,7 +48,7 @@ def getImageAsVector(data_loader, num):
 
 
 def ImageToVector(image):
-     """
+    """
     Converts 3 channel, 2D image to one-dimensional vectors.
     """
     return image.flatten();
